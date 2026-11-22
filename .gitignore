@@ -11,3 +11,7 @@ dist
 *.duckdb
 *.duckdb.wal
 artifacts/
+
+docs/CORPUS_SHA256.txt
+docs/ingested/ehr/*
+!docs/ingested/ehr/.gitkeep
