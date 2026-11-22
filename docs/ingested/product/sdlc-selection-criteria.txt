@@ -1,0 +1,21 @@
+Project condition -> suitable SDLC (course selection rules for EHR requirements engineering).
+Project-authored course guidance; not a regulatory source.
+
+Stable requirements and extensive approvals -> Waterfall.
+Strict verification and validation -> V-Model.
+High uncertainty or technical risk -> Spiral.
+Frequently changing requirements -> Agile.
+Continuous secure deployment -> DevSecOps.
+High regulation or patient-safety criticality with evolving requirements -> Agile-V-Model or DevSecOps hybrid.
+
+Decision factors to extract from a specification before choosing:
+requirement stability; patient-safety criticality; protected health information (PHI) privacy and security risk; regulatory and certification burden; project complexity; system size; legacy-system dependence; interoperability dependence on external systems (laboratory, pharmacy, imaging, billing, health information exchange); frequency of expected changes; need for continuous delivery; availability of clinicians and other stakeholders; testing and documentation requirements; budget and schedule constraints; need for formal verification; consequences of system failure (downtime during care, wrong-patient errors, data breach).
+
+Produce ranked recommendations with justification, then a project-specific workflow: phases, activities, roles, deliverables, security activities, testing, compliance checkpoints, human-approval gates, entry and exit criteria, traceability.
+
+EHR-specific notes for the selection:
+- A clinical module whose workflow is well understood and tightly scoped, with heavy approval needs, may fit Waterfall or V-Model.
+- A module with changing clinician workflows and user-interface feedback loops fits Agile, but patient-safety and privacy controls still need explicit verification gates.
+- Modules that exchange data with external systems benefit from incremental delivery with interface and conformance testing gates.
+- When a failure can harm a patient or expose PHI, add formal verification and validation gates and security activities at every stage (secure-by-design, threat modelling, security testing) rather than only at the end.
+- Clinical content, decision-support rules, and legal conclusions need human approval by qualified clinicians, privacy officers, and counsel regardless of the SDLC chosen.

@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CARE · EHR Requirements Studio</title>
+<style>
+  :root{
+    --bg:#f3f8f8; --panel:#ffffff; --ink:#13293d; --muted:#5b7280; --line:#dbe7e8;
+    --brand:#0f766e; --brand-2:#0b3c49; --accent:#2dd4bf; --soft:#e8f6f4; --err:#b91c1c;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0b1a20; --panel:#112a33; --ink:#e3f1f2; --muted:#93acb4; --line:#21424d; --soft:#143842; --brand:#2dd4bf; --brand-2:#99f6e4; --accent:#2dd4bf; --err:#fca5a5; color-scheme: dark; }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+  .shell{max-width:1240px;margin:0 auto;padding:28px 20px 64px}
+  header.hero{background:linear-gradient(135deg,#0b3c49,#0f766e);color:#fff;border-radius:22px;padding:28px 32px;box-shadow:0 16px 42px #0b3c4926}
+  .eyebrow{letter-spacing:.12em;text-transform:uppercase;font-size:.72rem;color:#99f6e4;font-weight:700}
+  .hero h1{font-size:clamp(1.7rem,4vw,2.6rem);line-height:1.1;margin:8px 0 8px}
+  .hero p{margin:0;max-width:760px;color:#d5f1ee}
+  .pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+  .pill{border:1px solid #ffffff3d;border-radius:999px;padding:4px 11px;font-size:.78rem;color:#e6fbf8}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;background:#94a3b8}
+  .dot.on{background:#34d399}.dot.off{background:#f87171}
+
+  .composer{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;margin:18px 0;box-shadow:0 5px 18px #0b3c490d}
+  .composer label{font-weight:700;display:block;margin-bottom:8px}
+  textarea{width:100%;min-height:120px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px 14px;font:inherit;color:var(--ink);background:var(--bg)}
+  textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+  .examples{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
+  .ex{border:1px solid var(--line);background:var(--soft);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:.82rem;cursor:pointer}
+  .ex:hover{border-color:var(--brand)}
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px}
+  button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:9px 16px}
+  button.primary{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+  @media (prefers-color-scheme: dark){button.primary{color:#062a2a}}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  .muted{color:var(--muted);font-size:.85rem}
+
+  .steps{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 14px}
+  .step{flex:1 1 180px;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:10px 14px;font-size:.9rem}
+  .step b{display:block;color:var(--brand)}
+  .step.run{border-color:var(--accent);box-shadow:0 0 0 3px #2dd4bf33}
+  .step.done{background:var(--soft)}
+  .step.err{border-color:var(--err)}
+  .banner{display:none;border:1px solid var(--err);color:var(--err);border-radius:12px;padding:10px 14px;margin-bottom:12px;white-space:pre-wrap}
+  .banner.show{display:block}
+
+  .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  @media (max-width:900px){.panels{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 5px 18px #0b3c490d;min-width:0}
+  .panel>header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .panel h2{margin:0;font-size:1.02rem;color:var(--brand-2)}
+  .panel h2 small{display:block;font-weight:500;color:var(--muted);font-size:.78rem}
+  .tools button{padding:5px 11px;font-size:.8rem}
+  .evidence{display:flex;flex-wrap:wrap;gap:6px;padding:10px 18px 0}
+  .evidence span{font-size:.72rem;border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:2px 9px}
+  .body{padding:6px 20px 20px;overflow-wrap:anywhere}
+  .empty{color:var(--muted);padding:28px 0;text-align:center}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:8px}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  .md h1{font-size:1.35rem;color:var(--brand-2);margin:.6em 0 .3em}
+  .md h2{font-size:1.1rem;color:var(--brand-2);border-bottom:1px solid var(--line);padding-bottom:5px;margin-top:1.6em}
+  .md h3,.md h4{font-size:1rem;color:var(--brand)}
+  .md table{border-collapse:collapse;display:block;overflow:auto;max-width:100%;margin:.8em 0}
+  .md th,.md td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top;font-size:.88rem}
+  .md th{background:var(--soft)}
+  .md code{background:var(--soft);padding:1px 5px;border-radius:5px;font-size:.85em}
+  .md hr{border:0;border-top:1px solid var(--line);margin:1.4em 0}
+  .md ul,.md ol{padding-left:1.4em}
+  .md blockquote{border-left:4px solid var(--accent);margin-left:0;padding-left:14px;color:var(--muted)}
+  footer.note{color:var(--muted);font-size:.8rem;margin-top:18px}
+
+  @media print{
+    :root{--bg:#fff;--panel:#fff;--ink:#000;--line:#bbb;--soft:#f1f1f1;--brand:#000;--brand-2:#000;--muted:#333}
+    body{background:#fff;color:#000}
+    header.hero,.composer,.steps,.tools,.banner,footer.note,.evidence,.row{display:none!important}
+    .panels{display:block}
+    .panel{border:0;box-shadow:none;margin-bottom:12px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="hero">
+    <div class="eyebrow">CARE · Requirements Engineering</div>
+    <h1>EHR Requirements Studio</h1>
+    <p>Describe an electronic health record system or module. Agent&nbsp;1 writes the SRS from retrieved public standards, then Agent&nbsp;2 selects and justifies an SDLC for it.</p>
+    <div class="pills">
+      <span class="pill"><span class="dot" id="lmdot"></span><span id="lmtext">Checking LM Studio…</span></span>
+      <span class="pill">BM25 evidence</span>
+      <span class="pill">Clinical and legal review required</span>
+    </div>
+  </header>
+
+  <section class="composer">
+    <label for="brief">Project brief</label>
+    <textarea id="brief" placeholder="e.g. Electronic prescribing module for a 40-bed hospital: physicians prescribe, pharmacists verify, drug-allergy checks, audit trail, FHIR integration with the pharmacy system."></textarea>
+    <div class="examples" id="examples"></div>
+    <div class="row">
+      <button class="primary" id="go">Generate SRS + SDLC</button>
+      <button id="cancel" disabled>Cancel</button>
+      <span class="muted" id="timer"></span>
+    </div>
+  </section>
+
+  <div class="steps">
+    <div class="step" id="s1"><b>1 · Ground</b>Retrieve evidence from the EHR corpus</div>
+    <div class="step" id="s2"><b>2 · Agent 1</b>Requirements Agent writes the SRS</div>
+    <div class="step" id="s3"><b>3 · Agent 2</b>SDLC Selection Agent decides</div>
+  </div>
+  <div class="banner" id="err"></div>
+
+  <div class="panels">
+    <section class="panel" id="p1">
+      <header>
+        <h2>Agent 1 · Software Requirements Specification<small>EHR Requirements Agent</small></h2>
+        <div class="tools"><button data-copy="srs">Copy</button> <button data-dl="srs">.md</button></div>
+      </header>
+      <div class="evidence" id="ev1"></div>
+      <div class="body"><div class="empty" id="srs">The SRS will appear here.</div></div>
+    </section>
+    <section class="panel" id="p2">
+      <header>
+        <h2>Agent 2 · SDLC Selection<small>EHR SDLC Selection Agent</small></h2>
+        <div class="tools"><button data-copy="sdlc">Copy</button> <button data-dl="sdlc">.md</button></div>
+      </header>
+      <div class="evidence" id="ev2"></div>
+      <div class="body"><div class="empty" id="sdlc">The SDLC recommendation will appear here after the SRS is done.</div></div>
+    </section>
+  </div>
+
+  <div class="row">
+    <button id="dlall" disabled>Download combined .md</button>
+    <button id="print" disabled>Print / Save as PDF</button>
+  </div>
+  <footer class="note">Generated locally by CARE. Clinical, legal, privacy, security, and accessibility conclusions require qualified human review. Unsupported claims are marked NEEDS-VALIDATION.</footer>
+</div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const state = { srs: '', sdlc: '', controller: null, t0: 0, tick: null };
+
+  // ---- tiny, safe markdown renderer (headings, tables, lists, bold/italic/code, hr, quotes) ----
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const inline = (s) => esc(s)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<em>$2</em>');
+  const cells = (line) => line.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((c) => c.trim());
+  const isSep = (line) => /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(line);
+  const BLOCK_START = /^(#{1,4}\s|\s*[-*]\s+|\s*\d+[.)]\s+|\s*>)/;
+  function md(src) {
+    const lines = src.replace(/\r\n/g, '\n').split('\n');
+    let out = '', i = 0;
+    while (i < lines.length) {
+      const line = lines[i];
+      if (!line.trim()) { i++; continue; }
+      let m;
+      if ((m = line.match(/^(#{1,4})\s+(.*)$/))) { const n = m[1].length; out += `<h${n}>${inline(m[2])}</h${n}>`; i++; continue; }
+      if (/^\s*(-{3,}|\*{3,})\s*$/.test(line)) { out += '<hr/>'; i++; continue; }
+      if (line.includes('|') && i + 1 < lines.length && isSep(lines[i + 1])) {
+        const head = cells(line); i += 2; let rows = '';
+        while (i < lines.length && lines[i].includes('|') && lines[i].trim()) { rows += '<tr>' + cells(lines[i]).map((c) => `<td>${inline(c)}</td>`).join('') + '</tr>'; i++; }
+        out += '<table><thead><tr>' + head.map((c) => `<th>${inline(c)}</th>`).join('') + `</tr></thead><tbody>${rows}</tbody></table>`; continue;
+      }
+      if (/^\s*[-*]\s+/.test(line)) { let li = ''; while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) { li += `<li>${inline(lines[i].replace(/^\s*[-*]\s+/, ''))}</li>`; i++; } out += `<ul>${li}</ul>`; continue; }
+      if (/^\s*\d+[.)]\s+/.test(line)) { let li = ''; while (i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])) { li += `<li>${inline(lines[i].replace(/^\s*\d+[.)]\s+/, ''))}</li>`; i++; } out += `<ol>${li}</ol>`; continue; }
+      if (/^\s*>\s?/.test(line)) { let q = ''; while (i < lines.length && /^\s*>\s?/.test(lines[i])) { q += lines[i].replace(/^\s*>\s?/, '') + ' '; i++; } out += `<blockquote>${inline(q)}</blockquote>`; continue; }
+      let p = '';
+      while (i < lines.length && lines[i].trim() && !BLOCK_START.test(lines[i]) && !(lines[i].includes('|') && i + 1 < lines.length && isSep(lines[i + 1]))) { p += lines[i] + ' '; i++; }
+      if (!p) { p = line; i++; }
+      out += `<p>${inline(p.trim())}</p>`;
+    }
+    return out;
+  }
+
+  // ---- UI helpers ----
+  const EXAMPLES = [
+    ['Patient chart & clinical notes', 'Clinical documentation module of an EHR: physicians and nurses create and sign encounter notes, view the patient chart, problem list, and allergies; role-based access, full audit trail, and FHIR export.'],
+    ['E-prescribing', 'Electronic prescribing module for a 40-bed hospital: physicians prescribe, pharmacists verify, drug-allergy and interaction checks, controlled-substance handling, audit trail, and FHIR integration with the pharmacy system.'],
+    ['Lab orders & results', 'Laboratory orders and results module: clinicians place orders, the lab system returns results through HL7 FHIR, abnormal results are flagged for review, and patients can see released results in the portal.'],
+    ['Patient portal access', 'Patient portal for an outpatient clinic EHR: patients view visit summaries, medications, and test results, request refills, message their care team, and grant proxy access to family members.'],
+    ['Scheduling & encounters', 'Appointment scheduling and encounter management for a multi-clinic group: front desk books and reschedules, reminders go to patients, check-in creates the encounter, and no-show tracking feeds reporting.'],
+    ['Audit & break-glass access', 'Access control and audit module: role-based access to patient records, emergency break-glass access with mandatory justification, tamper-evident audit logs, and privacy-officer review dashboards.'],
+  ];
+  const exBox = $('examples');
+  EXAMPLES.forEach(([label, text]) => {
+    const b = document.createElement('button'); b.className = 'ex'; b.textContent = label;
+    b.onclick = () => { $('brief').value = text; $('brief').focus(); };
+    exBox.appendChild(b);
+  });
+
+  const setStep = (id, cls) => { $(id).className = 'step' + (cls ? ' ' + cls : ''); };
+  const showErr = (msg) => { const b = $('err'); b.textContent = msg; b.classList.toggle('show', !!msg); };
+  const chips = (id, list) => { $(id).innerHTML = (list || []).map((x) => `<span>${esc(x.replace(/^docs\/ingested\//, ''))}</span>`).join(''); };
+  const setMd = (id, text) => { $(id).className = 'md'; $(id).innerHTML = md(text); };
+  const setNote = (id, html) => { $(id).className = 'empty'; $(id).innerHTML = html; };
+  const busy = (on) => { $('go').disabled = on; $('cancel').disabled = !on; };
+  const refreshActions = () => { const ok = !!(state.srs && state.sdlc); $('dlall').disabled = !ok; $('print').disabled = !ok; };
+
+  async function health() {
+    try {
+      const j = await (await fetch('/care/health')).json();
+      $('lmdot').className = 'dot ' + (j.lmStudio ? 'on' : 'off');
+      $('lmtext').textContent = j.lmStudio ? `LM Studio connected · ${j.model}` : 'LM Studio not reachable — start its server';
+    } catch { $('lmdot').className = 'dot off'; $('lmtext').textContent = 'Server unreachable'; }
+  }
+
+  async function post(path, body, signal) {
+    const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal });
+    let j = {}; try { j = await r.json(); } catch { /* non-JSON error page */ }
+    if (!r.ok) throw new Error(j.error || `Request failed (${r.status})`);
+    return j;
+  }
+
+  async function run() {
+    const prompt = $('brief').value.trim();
+    if (prompt.length < 8) { showErr('Write a project brief first (at least a sentence).'); return; }
+    showErr(''); state.srs = ''; state.sdlc = ''; refreshActions(); chips('ev1', []); chips('ev2', []);
+    setNote('srs', '<span class="spin"></span>Agent 1 is writing the SRS… (local models can take a few minutes)');
+    setNote('sdlc', 'Waiting for the SRS.');
+    setStep('s1', 'done'); setStep('s2', 'run'); setStep('s3', '');
+    state.controller = new AbortController(); busy(true);
+    state.t0 = Date.now(); $('timer').textContent = '0s elapsed';
+    state.tick = setInterval(() => { $('timer').textContent = Math.round((Date.now() - state.t0) / 1000) + 's elapsed'; }, 1000);
+    try {
+      const a = await post('/care/requirements', { prompt }, state.controller.signal);
+      state.srs = a.requirements; chips('ev1', a.evidence); setMd('srs', a.requirements); setStep('s2', 'done');
+
+      setStep('s3', 'run'); setNote('sdlc', '<span class="spin"></span>Agent 2 is selecting an SDLC…');
+      const b = await post('/care/sdlc', { requirements: a.requirements }, state.controller.signal);
+      state.sdlc = b.sdlc; chips('ev2', b.evidence); setMd('sdlc', b.sdlc); setStep('s3', 'done');
+      refreshActions();
+    } catch (e) {
+      const aborted = e && e.name === 'AbortError';
+      showErr(aborted ? 'Cancelled.' : `${e.message}\n\nCheck that LM Studio is running with the model loaded, then try again.`);
+      ['s2', 's3'].forEach((id) => { if ($(id).classList.contains('run')) setStep(id, aborted ? '' : 'err'); });
+      if (!state.srs) setNote('srs', 'The SRS will appear here.');
+      else if (!state.sdlc) setNote('sdlc', 'The SDLC step did not finish. Click Generate to retry.');
+    } finally { clearInterval(state.tick); busy(false); }
+  }
+
+  const download = (name, text) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/markdown' })); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  };
+  document.querySelectorAll('[data-copy]').forEach((b) => b.onclick = async () => {
+    const t = state[b.dataset.copy]; if (!t) return;
+    try { await navigator.clipboard.writeText(t); const o = b.textContent; b.textContent = 'Copied'; setTimeout(() => { b.textContent = o; }, 1200); }
+    catch { showErr('Copy was blocked by the browser; use the .md download instead.'); }
+  });
+  document.querySelectorAll('[data-dl]').forEach((b) => b.onclick = () => {
+    const k = b.dataset.dl; if (state[k]) download(k === 'srs' ? 'ehr-srs.md' : 'ehr-sdlc.md', state[k]);
+  });
+  $('dlall').onclick = () => download('ehr-srs-and-sdlc.md', `${state.srs.trim()}\n\n---\n\n${state.sdlc.trim()}\n`);
+  $('print').onclick = () => window.print();
+  $('go').onclick = run;
+  $('cancel').onclick = () => state.controller && state.controller.abort();
+  $('brief').addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') run(); });
+  health(); setInterval(health, 15000);
+
+  window.__care = { md }; // exposed for tests
+})();
+</script>
+</body>
+</html>
